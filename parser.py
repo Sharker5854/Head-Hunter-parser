@@ -37,7 +37,7 @@ class Parser:
 						"title" : title_block.get_text(strip=True),
 						"link" : title_block.get("href").split("?")[0],
 						"salary" : vac.find("span", class_="bloko-header-section-3").get_text().replace("\u202f", "") if ( vac.find("span", class_="bloko-header-section-3") != None ) else "Не указано",
-						"company" : vac.find("a", class_="bloko-link bloko-link_kind-tertiary").get_text().replace("\xa0", " ")
+						"company" : vac.find("a", class_="bloko-link bloko-link_kind-tertiary").get_text().replace("\xa0", " ") if ( vac.find("a", class_="bloko-link bloko-link_kind-tertiary") != None ) else "Компания не указана",
 					}
 				)
 
