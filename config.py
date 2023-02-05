@@ -15,7 +15,10 @@ SITES = {
 	},
 	"RabotaRu": {
 		"host" : "https://www.rabota.ru",
-		"url" : ""
+		"url" : "https://www.rabota.ru/vacancy/",
+		"area_param_name" : "sort",
+		"profession_param_name" : "query",
+		"page_param_name" : "page"
 	},
 	"JobLab": {
 		"host" : "https://joblab.ru",
@@ -25,6 +28,7 @@ SITES = {
 
 HEADHUNTER_AREA_PARAM = 1  # номер обозначает город, в котором ищем работу (1 - Москва, 2 - Питер и т.д.)
 SUPERJOB_AREA_PARAM = 4  # 4 - Москва
+RABOTARU_SORT_PARAM = "relevance"  # автоматически ищется в Москве, но есть другой параметр сортировки
 
 HEADERS = {
 	"accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
