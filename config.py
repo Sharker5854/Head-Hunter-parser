@@ -22,13 +22,17 @@ SITES = {
 	},
 	"JobLab": {
 		"host" : "https://joblab.ru",
-		"url" : ""
+		"url" : "https://joblab.ru/search.php",
+		"area_param_name" : "srcity",
+		"profession_param_name" : "srprofecy",
+		"page_param_name" : "page"
 	}
 }
 
 HEADHUNTER_AREA_PARAM = 1  # номер обозначает город, в котором ищем работу (1 - Москва, 2 - Питер и т.д.)
 SUPERJOB_AREA_PARAM = 4  # 4 - Москва
 RABOTARU_SORT_PARAM = "relevance"  # автоматически ищется в Москве, но есть другой параметр сортировки
+JOBLAB_AREA_PARAM = 77  # 77 - Москва, 50 - Московская область
 
 HEADERS = {
 	"accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",

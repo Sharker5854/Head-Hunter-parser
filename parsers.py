@@ -24,6 +24,24 @@ class Parser:
 		"Вытащить все нужные элементы из полученного HTML-ответа"
 		raise NotImplementedError()
 
+	def parse(self):
+		print(f"\nПоиск вакансий в Москве на {self.site}...\n")
+		responses = []
+		for page in range(1, self.pages+1):
+			responses.append(self.get_response(page))
+		data = []
+		if self.get_page_content(responses[0]) == None:
+			print("По вашему запросу ничего не найдено!")
+		else:
+			for resp in responses:
+				content = self.get_page_content(resp)
+				if content != None:
+					for dataset in content:
+						data.append(dataset)
+				else:
+					break
+		return data 
+
 
 class HeadHunter(Parser):
 	area = config.HEADHUNTER_AREA_PARAM
@@ -48,24 +66,6 @@ class HeadHunter(Parser):
 					}
 				)
 			return content
-
-	def parse(self):
-		print(f"\nПоиск вакансий в Москве на {self.site}...\n")
-		responses = []
-		for page in range(1, self.pages+1):
-			responses.append(self.get_response(page))
-		data = []
-		if self.get_page_content(responses[0]) == None:
-			print("По вашему запросу ничего не найдено!")
-		else:
-			for resp in responses:
-				content = self.get_page_content(resp)
-				if content != None:
-					for dataset in content:
-						data.append(dataset)
-				else:
-					break
-		return data
 
 
 class SuperJob(Parser):
@@ -92,24 +92,6 @@ class SuperJob(Parser):
 					}
 				)
 			return content
-
-	def parse(self):
-		print(f"\nПоиск вакансий в Москве на {self.site}...\n")
-		responses = []
-		for page in range(1, self.pages+1):
-			responses.append(self.get_response(page))
-		data = []
-		if self.get_page_content(responses[0]) == None:
-			print("По вашему запросу ничего не найдено!")
-		else:
-			for resp in responses:
-				content = self.get_page_content(resp)
-				if content != None:
-					for dataset in content:
-						data.append(dataset)
-				else:
-					break
-		return data
 
 
 class RabotaRu(Parser):
@@ -139,23 +121,45 @@ class RabotaRu(Parser):
 				})
 			return content
 
-	def parse(self):
-		print(f"\nПоиск вакансий в Москве на {self.site}...\n")
-		responses = []
-		for page in range(1, self.pages+1):
-			responses.append(self.get_response(page))
-		data = []
-		if self.get_page_content(responses[0]) == None:
-			print("По вашему запросу ничего не найдено!")
+
+class JobLab(Parser):
+	site = "JobLab"
+	area = config.JOBLAB_AREA_PARAM
+
+	def get_response(self, page) -> Response:
+		response = requests.get(
+			config.SITES[self.site]["url"], headers=config.HEADERS,
+			params={
+				self.area_param_name: self.area, 
+				self.profession_param_name: self.profession.encode("cp1251"),
+				self.page_param_name: page,
+				"r" : "vac",
+				"srregion" : "50",
+				"submit" : "1"
+			},
+		)
+		return response
+
+	def get_page_content(self, response: Response):
+		'''Поиск всех данных на одной конкретной page'''
+		soup = BeautifulSoup(response.text, "html.parser")
+		vacancies = soup.find_all("tr")
+		if len(vacancies) == 0:
+			return None
 		else:
-			for resp in responses:
-				content = self.get_page_content(resp)
-				if content != None:
-					for dataset in content:
-						data.append(dataset)
-				else:
-					break
-		return data
+			content = []
+			for vac in vacancies:
+				title_block = vac.find("p", class_="prof")
+				company_block = vac.find("p", class_="org")
+				if title_block and company_block:
+					salary_block = vac.find("td", class_="td-to-div-zp")
+					content.append({
+						"title" : title_block.find("a").get_text(strip=True),
+						"link" : config.SITES[self.site]["host"] + title_block.find("a").get("href"),
+						"salary" : salary_block.find("p").get_text(strip=True) if ( salary_block.find("p").get_text(strip=True) != None ) else "Не указано",
+						"company" : company_block.find("a").get_text(strip=True)
+					})
+			return content
 
 
 def write_in_file(profession, dataset):
@@ -173,7 +177,8 @@ def write_in_file(profession, dataset):
 				writer.writerow([""])
 				writer.writerow([""])
 		print(f"Файл {profession.title()}.{config.SAVE_FILE_EXTENSION} сохранён на рабочий стол!")
-	except:
+	except Exception as exc:
+		print(str(exc))
 		print("Ошибка при записи в файл.")
 	input("\n\n-------------------------------\nНажмите Enter чтобы завершить.")
 
@@ -184,7 +189,8 @@ def main():
 	site_results = [
 		(HeadHunter.site, HeadHunter(profession, pages).parse() ),
 		(SuperJob.site, SuperJob(profession, pages).parse() ),
-		(RabotaRu.site, RabotaRu(profession, pages).parse() )
+		(RabotaRu.site, RabotaRu(profession, pages).parse() ),
+		(JobLab.site, JobLab(profession, pages).parse() )
 	]
 	write_in_file(profession, site_results)
 	
